@@ -23,7 +23,7 @@ export async function handleProxyRequest(request: Request): Promise<Response> {
         {
           status: "online",
           service: "Universal High-Speed CORS Media Relay",
-          version: "2.1.0",
+          version: "2.1.1",
           usage: `${reqUrl.origin}/api/proxy?u=<STREAM_OR_M3U8_URL>`,
           endpoints: [
             "/api/proxy?u=",
@@ -61,6 +61,9 @@ export async function handleProxyRequest(request: Request): Promise<Response> {
     const fetchHeaders = new Headers();
     if (customReferer) {
       fetchHeaders.set("Referer", customReferer);
+    } else if (targetUrl.includes("slivcdn.com")) {
+      fetchHeaders.set("Referer", "https://www.sonyliv.com/");
+      fetchHeaders.set("Origin", "https://www.sonyliv.com");
     } else {
       fetchHeaders.set("Referer", `${parsedTarget.protocol}//${parsedTarget.host}/`);
     }
@@ -180,8 +183,6 @@ export async function handleProxyRequest(request: Request): Promise<Response> {
 
 function rewriteM3u8(manifest: string, originalUrl: string, proxyBase: string): string {
   const lines = manifest.split(/\r?\n/);
-  const parsed = new URL(originalUrl);
-  const basePath = originalUrl.substring(0, originalUrl.lastIndexOf("/") + 1);
 
   return lines
     .map((line) => {
@@ -189,9 +190,13 @@ function rewriteM3u8(manifest: string, originalUrl: string, proxyBase: string): 
       if (!trimmed) return line;
 
       if (trimmed.startsWith("#EXT-X-KEY:") || trimmed.startsWith("#EXT-X-MAP:")) {
-        return line.replace(/URI="([^"]+)"/, (_, uri) => {
-          const resolved = resolveUrl(uri, basePath, parsed.origin);
-          return `URI="${proxyBase}${encodeURIComponent(resolved)}"`;
+        return line.replace(/URI=["']([^"']+)["']/, (_, uri) => {
+          try {
+            const resolved = new URL(uri, originalUrl).toString();
+            return `URI="${proxyBase}${encodeURIComponent(resolved)}"`;
+          } catch {
+            return line;
+          }
         });
       }
 
@@ -199,18 +204,12 @@ function rewriteM3u8(manifest: string, originalUrl: string, proxyBase: string): 
         return line;
       }
 
-      const resolved = resolveUrl(trimmed, basePath, parsed.origin);
-      return `${proxyBase}${encodeURIComponent(resolved)}`;
+      try {
+        const resolved = new URL(trimmed, originalUrl).toString();
+        return `${proxyBase}${encodeURIComponent(resolved)}`;
+      } catch {
+        return line;
+      }
     })
     .join("\n");
-}
-
-function resolveUrl(urlStr: string, basePath: string, origin: string): string {
-  if (urlStr.startsWith("http://") || urlStr.startsWith("https://")) {
-    return urlStr;
-  }
-  if (urlStr.startsWith("/")) {
-    return `${origin}${urlStr}`;
-  }
-  return `${basePath}${urlStr}`;
 }
