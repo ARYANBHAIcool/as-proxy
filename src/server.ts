@@ -2,7 +2,6 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { handleProxyRequest } from "./proxy-engine";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -49,14 +48,15 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     const url = new URL(request.url);
 
-    // High-speed proxy endpoints
+    // Direct proxy routing for maximum speed
     if (
       url.pathname === "/api/proxy" ||
       url.pathname === "/proxy" ||
-      url.pathname === "/api/public/px" ||
+      url.pathname.startsWith("/api/public/px") ||
       url.pathname.startsWith("/api/proxy/")
     ) {
-      return await handleProxyRequest(request);
+      const { handleProxy } = await import("./lib/stream-proxy.server");
+      return await handleProxy(request);
     }
 
     try {

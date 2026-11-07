@@ -10,60 +10,72 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiProxyRouteImport } from './routes/api/proxy'
+import { Route as ApiPublicPxGeobypassRouteImport } from './routes/api/public/px/geobypass'
+import { Route as ApiPublicPxSonyRouteImport } from './routes/api/public/px/sony'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProxyRoute = ApiProxyRouteImport.update({
+  id: '/api/proxy',
+  path: '/api/proxy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicPxGeobypassRoute = ApiPublicPxGeobypassRouteImport.update({
+  id: '/api/public/px/geobypass',
+  path: '/api/public/px/geobypass',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicPxSonyRoute = ApiPublicPxSonyRouteImport.update({
+  id: '/api/public/px/sony',
+  path: '/api/public/px/sony',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/proxy': typeof ApiProxyRoute
+  '/api/public/px/geobypass': typeof ApiPublicPxGeobypassRoute
+  '/api/public/px/sony': typeof ApiPublicPxSonyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/proxy': typeof ApiProxyRoute
+  '/api/public/px/geobypass': typeof ApiPublicPxGeobypassRoute
+  '/api/public/px/sony': typeof ApiPublicPxSonyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/proxy': typeof ApiProxyRoute
+  '/api/public/px/geobypass': typeof ApiPublicPxGeobypassRoute
+  '/api/public/px/sony': typeof ApiPublicPxSonyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/proxy' | '/api/public/px/geobypass' | '/api/public/px/sony'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/proxy' | '/api/public/px/geobypass' | '/api/public/px/sony'
+  id: '__root__' | '/' | '/api/proxy' | '/api/public/px/geobypass' | '/api/public/px/sony'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
+  ApiProxyRoute: typeof ApiProxyRoute
+  ApiPublicPxGeobypassRoute: typeof ApiPublicPxGeobypassRoute
+  ApiPublicPxSonyRoute: typeof ApiPublicPxSonyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiProxyRoute: ApiProxyRoute,
+  ApiPublicPxGeobypassRoute: ApiPublicPxGeobypassRoute,
+  ApiPublicPxSonyRoute: ApiPublicPxSonyRoute,
 }
+
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
