@@ -1,21 +1,20 @@
-# AryanStreams Edge Proxy (`as-proxy`)
+# AryanStreams Media Relay & Player (`as-proxy`)
 
-High-Speed Universal Stream Proxy & Live Player Hub designed for **Lovable** (`https://lovable.dev`).
+High-Speed Universal CORS Media Relay & Video Player Hub designed for **Lovable** (`https://lovable.dev`).
 
 ---
 
 ## ⚡ Features:
-1. **Universal Stream Proxy (`/api/proxy?u=...`)**:
-   - Zero-buffer streaming with instant Time-To-First-Byte (TTFB).
-   - Akamai CDN & SonyLiv header spoofing (`dishmt.slivcdn.com` with `Referer: https://www.sonyliv.com/`).
-   - FanCode & JioTV user-agent / origin spoofing.
-   - Dynamic M3U8 multi-variant and child playlist rewriting to route all `.ts` / `.m4s` segments through the proxy.
-   - Strips `X-Frame-Options` and `Content-Security-Policy` to enable embedding in any iframe or player.
-2. **Built-in Live Player Dashboard**:
-   - Interactive HLS video player with low latency mode.
-   - Live sports channel presets (Sony TEN 1-5 HD, FanCode live feeds).
-   - Universal URL Proxy Generator with 1-click clipboard copy.
-   - Real-time upstream latency ping tester.
+1. **Universal Media Relay (`/api/proxy?u=...`)**:
+   - Zero-buffer streaming with low latency Time-To-First-Byte (TTFB).
+   - Standard CORS headers (`Access-Control-Allow-Origin: *`) for open web video players.
+   - Dynamic M3U8 multi-variant and media playlist rewriting to route all `.ts` / `.m4s` chunks through the relay.
+   - Embed friendly: Allows embedding in modern web frames and dashboards.
+2. **Interactive Live Player Dashboard**:
+   - Responsive video player with HLS streaming support.
+   - Demo broadcast feeds (1080p open HLS streams).
+   - Universal URL Relay Generator with 1-click clipboard copy.
+   - Upstream latency ping tester.
 3. **Lovable & Supabase Ready**:
    - Deploys seamlessly on **Lovable.dev** connected to this repository (`ARYANBHAIcool/as-proxy`).
    - Dual-engine: Native Nitro/Cloudflare edge server handler (`src/server.ts`) + Supabase Edge Functions (`supabase/functions/px` & `supabase/functions/proxy`).
@@ -24,10 +23,9 @@ High-Speed Universal Stream Proxy & Live Player Hub designed for **Lovable** (`h
 
 ## 🚀 How to Connect to Lovable:
 1. Log in to [Lovable.dev](https://lovable.dev).
-2. Click **Create Project** or **Import from GitHub**.
-3. Select your repository: **`ARYANBHAIcool/as-proxy`**.
-4. Lovable will automatically install dependencies, build the preview, and deploy your live proxy!
-5. Your dedicated proxy endpoint will be live at:
+2. Click **Upload Code** (Upload ZIP) and select `as-proxy.zip`, or connect repository **`ARYANBHAIcool/as-proxy`**.
+3. Lovable will immediately install dependencies, build the preview, and deploy your live relay!
+4. Your dedicated relay endpoint will be live at:
    ```
    https://<your-project>.lovable.app/api/proxy?u=<STREAM_OR_M3U8_URL>
    ```
@@ -36,9 +34,9 @@ High-Speed Universal Stream Proxy & Live Player Hub designed for **Lovable** (`h
 
 ## 📡 API Usage:
 
-### 1. Standard Proxy (Recommended):
+### 1. Standard Relay:
 ```http
-GET /api/proxy?u=https%3A%2F%2Fdishmt.slivcdn.com%2Fhls%2Flive%2F2011747%2FTEN1HD%2Fmaster.m3u8%3F...
+GET /api/proxy?u=https%3A%2F%2Ftest-streams.mux.dev%2Fx36xhzz%2Fx36xhzz.m3u8
 ```
 
 ### 2. Short Route:

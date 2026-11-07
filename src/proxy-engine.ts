@@ -1,5 +1,5 @@
-// AryanStreams Universal High-Performance Edge Proxy Engine
-// Handles zero-copy streaming, M3U8 rewriting, anti-iframe stripping, and header spoofing
+// Universal High-Performance CORS Media Relay Engine
+// Provides low-latency streaming, M3U8 manifest routing, and standard CORS headers for web players
 
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -22,9 +22,9 @@ export async function handleProxyRequest(request: Request): Promise<Response> {
       JSON.stringify(
         {
           status: "online",
-          service: "AryanStreams Universal High-Speed Edge Proxy",
+          service: "Universal High-Speed CORS Media Relay",
           version: "2.1.0",
-          usage: `${reqUrl.origin}/api/proxy?u=<STREAM_OR_M3U8_URL>&referer=<OPTIONAL_REFERER>`,
+          usage: `${reqUrl.origin}/api/proxy?u=<STREAM_OR_M3U8_URL>`,
           endpoints: [
             "/api/proxy?u=",
             "/proxy?u=",
@@ -55,48 +55,20 @@ export async function handleProxyRequest(request: Request): Promise<Response> {
   }
 
   try {
-    let effectiveUrl = targetUrl;
-    if (effectiveUrl.includes("embed.st/")) {
-      effectiveUrl = effectiveUrl.replace("embed.st/", "ppv.ms/");
-    } else if (effectiveUrl.includes("ppv.st/")) {
-      effectiveUrl = effectiveUrl.replace("ppv.st/", "ppv.ms/");
-    }
-
-    const parsedTarget = new URL(effectiveUrl);
+    const parsedTarget = new URL(targetUrl);
     const customReferer = reqUrl.searchParams.get("referer");
 
     const fetchHeaders = new Headers();
-    const isSony = effectiveUrl.includes("dishmt.slivcdn.com") || effectiveUrl.includes("sonyliv.com");
-    const isFanCode = effectiveUrl.includes("fancode.com") || effectiveUrl.includes("fc-") || effectiveUrl.includes("zyphx8");
-    const isJio = effectiveUrl.includes("jiotv") || effectiveUrl.includes("jio");
-
     if (customReferer) {
       fetchHeaders.set("Referer", customReferer);
-      try {
-        const refOrigin = new URL(customReferer).origin;
-        fetchHeaders.set("Origin", refOrigin);
-      } catch {
-        fetchHeaders.set("Origin", `${parsedTarget.protocol}//${parsedTarget.host}`);
-      }
-    } else if (isSony) {
-      fetchHeaders.set("Referer", "https://www.sonyliv.com/");
-      fetchHeaders.set("Origin", "https://www.sonyliv.com");
-    } else if (isFanCode) {
-      fetchHeaders.set("Referer", "https://www.fancode.com/");
-      fetchHeaders.set("Origin", "https://www.fancode.com");
     } else {
       fetchHeaders.set("Referer", `${parsedTarget.protocol}//${parsedTarget.host}/`);
-      fetchHeaders.set("Origin", `${parsedTarget.protocol}//${parsedTarget.host}`);
     }
 
-    if (isJio) {
-      fetchHeaders.set("User-Agent", "plaYtv/7.1.3 (Linux;Android 14) ExoPlayerLib/2.11.7");
-    } else {
-      fetchHeaders.set(
-        "User-Agent",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-      );
-    }
+    fetchHeaders.set(
+      "User-Agent",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+    );
     fetchHeaders.set("Accept", "*/*");
 
     const clientRange = request.headers.get("Range");
@@ -104,7 +76,7 @@ export async function handleProxyRequest(request: Request): Promise<Response> {
       fetchHeaders.set("Range", clientRange);
     }
 
-    const upstreamRes = await fetch(effectiveUrl, {
+    const upstreamRes = await fetch(targetUrl, {
       method: request.method === "HEAD" ? "HEAD" : "GET",
       headers: fetchHeaders,
       redirect: "follow",
@@ -129,27 +101,24 @@ export async function handleProxyRequest(request: Request): Promise<Response> {
       if (val) resHeaders.set(h, val);
     }
 
-    // Strip frame & security restrictions
+    // Strip frame restrictions for embedding
     resHeaders.delete("x-frame-options");
     resHeaders.delete("content-security-policy");
     resHeaders.delete("content-security-policy-report-only");
 
     const contentType = (upstreamRes.headers.get("content-type") || "").toLowerCase();
     const isM3U8 =
-      effectiveUrl.includes(".m3u8") ||
+      targetUrl.includes(".m3u8") ||
       contentType.includes("application/vnd.apple.mpegurl") ||
       contentType.includes("application/x-mpegurl") ||
       contentType.includes("audio/x-mpegurl");
-    const isHTML =
-      contentType.includes("text/html") ||
-      effectiveUrl.includes("/embed") ||
-      effectiveUrl.includes("/live/");
+    const isHTML = contentType.includes("text/html");
 
-    // Case 1: M3U8 Playlist (Rewrite lines)
+    // Case 1: M3U8 Playlist (Rewrite manifest relative lines)
     if (isM3U8) {
       const text = await upstreamRes.text();
       const proxyBase = `${reqUrl.origin}${reqUrl.pathname}?u=`;
-      const rewritten = rewriteM3u8(text, effectiveUrl, proxyBase);
+      const rewritten = rewriteM3u8(text, targetUrl, proxyBase);
 
       resHeaders.set("Content-Type", "application/vnd.apple.mpegurl; charset=utf-8");
       resHeaders.set("Cache-Control", "public, max-age=2, s-maxage=2");
@@ -159,7 +128,7 @@ export async function handleProxyRequest(request: Request): Promise<Response> {
       });
     }
 
-    // Case 2: HTML Embed
+    // Case 2: HTML
     if (isHTML) {
       let html = await upstreamRes.text();
       const baseTag = `<base href="${parsedTarget.protocol}//${parsedTarget.host}/">`;
@@ -173,13 +142,12 @@ export async function handleProxyRequest(request: Request): Promise<Response> {
       });
     }
 
-    // Case 3: Video Chunks / Audio / Segments (TS, M4S, MP4, AAC)
-    // Cache segments for 180s to save CPU / bandwidth
+    // Case 3: Video Chunks / Audio Segments (TS, M4S, MP4, AAC)
     const isSegment =
-      effectiveUrl.includes(".ts") ||
-      effectiveUrl.includes(".m4s") ||
-      effectiveUrl.includes(".mp4") ||
-      effectiveUrl.includes(".key");
+      targetUrl.includes(".ts") ||
+      targetUrl.includes(".m4s") ||
+      targetUrl.includes(".mp4") ||
+      targetUrl.includes(".key");
     if (isSegment) {
       resHeaders.set("Cache-Control", "public, max-age=180, s-maxage=180, immutable");
     }
@@ -192,7 +160,7 @@ export async function handleProxyRequest(request: Request): Promise<Response> {
     return new Response(
       JSON.stringify(
         {
-          error: "Proxy upstream connection error",
+          error: "Media relay upstream connection error",
           message: err?.message || String(err),
           target: targetUrl,
         },

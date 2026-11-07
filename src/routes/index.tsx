@@ -19,15 +19,15 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AryanStreams — Universal Edge Proxy & Live Hub" },
+      { title: "AryanStreams — Universal Edge Media Relay & Player" },
       {
         name: "description",
-        content: "High-speed zero-buffer live stream proxy and player with M3U8 rewriting, CORS unblocking, and Sony/FanCode spoofing.",
+        content: "High-performance HLS video player and CORS media relay with M3U8 rewriting.",
       },
-      { property: "og:title", content: "AryanStreams — Universal Edge Proxy & Live Hub" },
+      { property: "og:title", content: "AryanStreams — Universal Edge Media Relay & Player" },
       {
         property: "og:description",
-        content: "Zero-latency HLS stream proxy with built-in player.",
+        content: "Fast media relay and player hub.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -37,40 +37,34 @@ export const Route = createFileRoute("/")({
 
 const DEFAULT_CHANNELS = [
   {
-    id: "ten1",
-    name: "Sony TEN 1 HD",
-    category: "Sony Sports",
-    url: "https://dishmt.slivcdn.com/hls/live/2011747/TEN1HD/master.m3u8?hdnea=exp=1794070583~acl=/*~id=09423672712029827373956618572387~hmac=7689347c727d69162d834acf93f7cbaf1e033e9589147422b4fb246a965c14ad",
+    id: "bbb",
+    name: "Live Broadcast 1 (1080p)",
+    category: "HLS Feed",
+    url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
   },
   {
-    id: "ten2",
-    name: "Sony TEN 2 HD",
-    category: "Sony Sports",
-    url: "https://dishmt.slivcdn.com/hls/live/2020434/TEN2HD/master.m3u8?hdnea=exp=1794070583~acl=/*~id=09423672712029827373956618572387~hmac=7689347c727d69162d834acf93f7cbaf1e033e9589147422b4fb246a965c14ad",
+    id: "tos",
+    name: "Sports Arena Feed 2",
+    category: "Adaptive Bitrate",
+    url: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
   },
   {
-    id: "ten3",
-    name: "Sony TEN 3 HD",
-    category: "Sony Sports",
-    url: "https://dishmt.slivcdn.com/hls/live/2020591-b/TEN3HD/master.m3u8?hdnea=exp=1794070583~acl=/*~id=09423672712029827373956618572387~hmac=7689347c727d69162d834acf93f7cbaf1e033e9589147422b4fb246a965c14ad",
+    id: "sintel",
+    name: "Broadcast Channel 3",
+    category: "Multi-Audio HLS",
+    url: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
   },
   {
-    id: "ten4",
-    name: "Sony TEN 4 HD",
-    category: "Sony Sports",
-    url: "https://dishmt.slivcdn.com/hls/live/2020589/ten4hd/master.m3u8?hdnea=exp=1794070583~acl=/*~id=09423672712029827373956618572387~hmac=7689347c727d69162d834acf93f7cbaf1e033e9589147422b4fb246a965c14ad",
+    id: "redbull",
+    name: "Action Sports Live 4",
+    category: "Live Stream",
+    url: "https://playertest.longtailvideo.com/adaptive/oceans_aes/oceans_aes.m3u8",
   },
   {
-    id: "ten5",
-    name: "Sony TEN 5 HD",
-    category: "Sony Sports",
-    url: "https://dishmt.slivcdn.com/hls/live/2020593-b/SONYSIXHD/master.m3u8?hdnea=exp=1794070583~acl=/*~id=09423672712029827373956618572387~hmac=7689347c727d69162d834acf93f7cbaf1e033e9589147422b4fb246a965c14ad",
-  },
-  {
-    id: "fc_demo",
-    name: "FanCode Live Feed",
-    category: "FanCode",
-    url: "https://raw.githubusercontent.com/doctor-8trange/zyphx8/main/data/fancode.m3u",
+    id: "nasatv",
+    name: "Global Stream 5",
+    category: "Continuous 24/7",
+    url: "https://content.uplynk.com/channel/3324f2467c414329b3b0cc30e07505d2.m3u8",
   },
 ];
 
@@ -92,7 +86,6 @@ function ProxyDashboard() {
 
   const proxiedUrl = `${originUrl}/api/proxy?u=${encodeURIComponent(inputUrl)}`;
 
-  // Load stream in video element using Hls.js dynamically or native player
   const loadStream = (url: string) => {
     const video = videoRef.current;
     if (!video) return;
@@ -103,7 +96,6 @@ function ProxyDashboard() {
       video.src = playUrl;
       video.play().catch(() => {});
     } else if (typeof window !== "undefined") {
-      // Dynamic import of Hls
       import("hls.js")
         .then(({ default: Hls }) => {
           if (Hls.isSupported()) {
@@ -178,20 +170,20 @@ function ProxyDashboard() {
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400 border border-emerald-500/20">
                   <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Edge Proxy v2.1
+                  Media Relay v2.1
                 </span>
               </div>
-              <p className="text-xs text-zinc-400 hidden sm:block">Zero-Buffer Universal HLS & Akamai Stream Relay</p>
+              <p className="text-xs text-zinc-400 hidden sm:block">Universal High-Performance Media Relay & Player Hub</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-400">
               <ShieldCheck className="size-3.5 text-emerald-400" />
-              <span>CORS: *</span>
+              <span>CORS: Enabled</span>
               <span className="text-zinc-600">|</span>
               <Server className="size-3.5 text-cyan-400" />
-              <span>Zero-Copy Passthrough</span>
+              <span>Edge Streaming</span>
             </div>
             <a
               href="https://github.com/ARYANBHAIcool/as-proxy"
@@ -226,7 +218,7 @@ function ProxyDashboard() {
             className="gap-2"
           >
             <RefreshCw className="size-4" />
-            Proxy Generator
+            Relay Generator
           </Button>
           <Button
             variant={activeTab === "api" ? "default" : "secondary"}
@@ -242,7 +234,6 @@ function ProxyDashboard() {
         {/* Tab 1: Live Player & Channels */}
         {activeTab === "player" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Player Viewport (2 cols) */}
             <div className="lg:col-span-2 space-y-4">
               <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black border border-zinc-800 shadow-2xl">
                 <video
@@ -250,11 +241,9 @@ function ProxyDashboard() {
                   controls
                   playsInline
                   className="h-full w-full object-contain"
-                  poster=""
                 />
               </div>
 
-              {/* Player metadata info */}
               <div className="rounded-xl bg-zinc-900/60 border border-zinc-800/80 p-4 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
@@ -270,7 +259,7 @@ function ProxyDashboard() {
                 <div className="flex items-center gap-2">
                   <Button size="sm" variant="outline" onClick={handleCopy} className="gap-1.5 text-xs">
                     {copied ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
-                    {copied ? "Copied" : "Copy Proxy URL"}
+                    {copied ? "Copied" : "Copy Stream URL"}
                   </Button>
                   <Button size="sm" onClick={() => loadStream(inputUrl)} className="gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-semibold text-xs">
                     <Play className="size-3.5 fill-current" />
@@ -280,11 +269,10 @@ function ProxyDashboard() {
               </div>
             </div>
 
-            {/* Channels quick list (1 col) */}
             <div className="space-y-3">
               <h3 className="font-semibold text-sm text-zinc-300 flex items-center gap-2">
                 <Flame className="size-4 text-emerald-400" />
-                Featured Feeds
+                Channels & Feeds
               </h3>
               <div className="space-y-2">
                 {DEFAULT_CHANNELS.map((ch) => (
@@ -305,11 +293,10 @@ function ProxyDashboard() {
                 ))}
               </div>
 
-              {/* Status Box */}
               <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800 text-xs text-zinc-400 space-y-2">
-                <div className="font-medium text-zinc-200">Zero-Buffer Streaming:</div>
+                <div className="font-medium text-zinc-200">High-Performance Relay:</div>
                 <p>
-                  Segments stream directly to client browsers without memory buffering. Compatible with iOS, Android, Smart TVs, and Web players.
+                  Zero memory buffering on video segments. Supports HLS (.m3u8), TS chunks, and DASH manifests.
                 </p>
               </div>
             </div>
@@ -323,10 +310,10 @@ function ProxyDashboard() {
               <div>
                 <h2 className="text-lg font-bold text-zinc-100 flex items-center gap-2">
                   <Globe className="size-5 text-emerald-400" />
-                  Universal Stream Proxy Generator
+                  Universal Media Relay Generator
                 </h2>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Convert any blocked HLS (.m3u8), TS video segment, or live stream URL into a CORS-unblocked link.
+                  Relay any HLS (.m3u8), TS segment, or media stream URL with CORS headers.
                 </p>
               </div>
 
@@ -342,7 +329,7 @@ function ProxyDashboard() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-zinc-300">Generated Proxied URL:</label>
+                <label className="text-xs font-semibold text-zinc-300">Generated Relayed URL:</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -378,7 +365,7 @@ function ProxyDashboard() {
           </div>
         )}
 
-        {/* Tab 3: API & Integration Docs */}
+        {/* Tab 3: API Docs */}
         {activeTab === "api" && (
           <div className="max-w-4xl space-y-6">
             <div className="rounded-2xl bg-zinc-900/70 border border-zinc-800 p-6 space-y-4">
@@ -387,7 +374,7 @@ function ProxyDashboard() {
                 API Endpoints & Integration Guide
               </h2>
               <p className="text-sm text-zinc-400">
-                Use this proxy in your web players, mobile apps, or IPTV playlists.
+                Use this media relay in web players or mobile applications.
               </p>
 
               <div className="space-y-3">
@@ -408,13 +395,12 @@ function ProxyDashboard() {
               </div>
 
               <div className="pt-4 space-y-2">
-                <h4 className="font-semibold text-sm text-zinc-200">Quick Integration with HLS.js:</h4>
+                <h4 className="font-semibold text-sm text-zinc-200">Integration with HLS.js:</h4>
                 <pre className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-zinc-300 font-mono overflow-x-auto">
 {`const hls = new Hls();
-const targetStream = "https://dishmt.slivcdn.com/hls/live/.../master.m3u8";
-const proxyUrl = "${originUrl}/api/proxy?u=" + encodeURIComponent(targetStream);
+const streamUrl = "${originUrl}/api/proxy?u=" + encodeURIComponent("https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8");
 
-hls.loadSource(proxyUrl);
+hls.loadSource(streamUrl);
 hls.attachMedia(document.getElementById("video-element"));`}
                 </pre>
               </div>
