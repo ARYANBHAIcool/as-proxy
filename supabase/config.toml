@@ -1,0 +1,7 @@
+project_id = "as-proxy"
+
+[functions.proxy]
+verify_jwt = false
+
+[functions.px]
+verify_jwt = false
